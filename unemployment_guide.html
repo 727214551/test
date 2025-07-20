@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ja" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>弁護士と社労士が教える！失業保険のもらい方ガイド</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Support -->
+    <!-- Application Structure Plan: セクションベースのSPA構造を採用。上部にナビゲーションを配置し、ユーザーが必要な情報（「対象者確認」「手続きの流れ」「給付額と期間」「注意点」）へ直接アクセスできるようにする。特に対象者確認は簡単なクイズ形式、給付期間はインタラクティブなチャートを用いることで、複雑な制度をユーザー自身の状況に落とし込んで理解しやすくする。この構造は、不安を抱えるユーザーを「私はもらえる？」という最初の疑問から、「どうすれば？」「どのくらい？」「気をつけることは？」という具体的な行動と知識へとスムーズに導くために選択した。 -->
+    <!-- Visualization & Content Choices: 
+        1. Eligibility Check (Report Info: 受給資格要件) -> Goal: Inform/Organize -> Viz/Presentation: Interactive Quiz (HTML/JS) -> Interaction: ユーザーが選択肢を選ぶと、簡易的な判定結果が表示される。 -> Justification: 静的な箇条書きよりもエンゲージメントを高め、自分事として捉えやすくするため。 -> Library/Method: Vanilla JS.
+        2. Process Flow (Report Info: 受給手続きのステップ) -> Goal: Organize/Inform -> Viz/Presentation: 番号付きリストとアイコン (HTML/Tailwind) -> Interaction: 各ステップをクリックすると詳細が表示される（今回はシンプルに静的表示）。 -> Justification: 複雑なプロセスを視覚的に分かりやすいステップに分解するため。 -> Library/Method: HTML/Tailwind.
+        3. Benefit Duration (Report Info: 所定給付日数) -> Goal: Compare/Inform -> Viz/Presentation: Interactive Bar Chart (Canvas) -> Interaction: 離職理由、年齢、被保険者期間をドロップダウンで選択すると、対応する給付日数がチャートに反映される。 -> Justification: 条件によって変動する最も複雑な部分を、静的な表ではなく動的なグラフで示すことで、直感的な理解を促すため。 -> Library/Method: Chart.js.
+        4. Key Cautions (Report Info: 注意事項) -> Goal: Inform -> Viz/Presentation: Card Layout (HTML/Tailwind) -> Interaction: なし。 -> Justification: 重要な警告やアドバイスを、明確に区切られたカードで提示し、可読性を高めるため。 -> Library/Method: HTML/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+            background-color: #f8fafc; /* bg-slate-50 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <span class="text-xl sm:text-2xl font-bold text-sky-800">失業保険お悩み解決ガイド</span>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#introduction" class="text-slate-600 hover:text-sky-700 font-medium">はじめに</a>
+                    <a href="#checker" class="text-slate-600 hover:text-sky-700 font-medium">あなたは対象？</a>
+                    <a href="#process" class="text-slate-600 hover:text-sky-700 font-medium">手続きの流れ</a>
+                    <a href="#amount" class="text-slate-600 hover:text-sky-700 font-medium">金額と期間</a>
+                    <a href="#cautions" class="text-slate-600 hover:text-sky-700 font-medium">注意点</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        
+        <section id="introduction" class="mb-16">
+            <div class="text-center bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
+                <h1 class="text-3xl md:text-4xl font-bold text-sky-800 mb-4">弁護士と社労士が教える！<br>失業保険のもらい方ガイド</h1>
+                <p class="text-lg text-slate-600 max-w-3xl mx-auto">
+                    仕事を辞めて、次の仕事を探すまでの生活を支える大切な「失業保険（雇用保険の基本手当）」。
+                    でも、手続きは複雑で分かりにくいもの。このガイドは、そんなあなたの不安を解消し、スムーズに給付を受けられるよう、専門家が分かりやすく解説します。
+                </p>
+            </div>
+        </section>
+        
+        <section id="checker" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-slate-800">あなたは対象？</h2>
+            <p class="text-center text-slate-500 mb-8">まずは、あなたが失業保険をもらえるか、3つの質問でチェックしてみましょう。</p>
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
+                <div id="quiz">
+                    <div class="mb-6">
+                        <p class="font-bold text-lg mb-2">質問1：会社で雇用保険に入っていましたか？</p>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center"><input type="radio" name="q1" value="yes" class="mr-2">はい</label>
+                            <label class="flex items-center"><input type="radio" name="q1" value="no" class="mr-2">いいえ・わからない</label>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <p class="font-bold text-lg mb-2">質問2：退職前の2年間に、12ヶ月以上働いていましたか？</p>
+                        <p class="text-sm text-slate-500 mb-2">※給与の支払いがあった日が11日以上ある月を1ヶ月と数えます。<br>※会社の倒産や解雇、正当な理由のある自己都合退職の場合は「1年間に6ヶ月以上」に緩和されます。</p>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center"><input type="radio" name="q2" value="yes" class="mr-2">はい</label>
+                            <label class="flex items-center"><input type="radio" name="q2" value="no" class="mr-2">いいえ</label>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <p class="font-bold text-lg mb-2">質問3：今すぐ働きたいという意思と能力がありますか？</p>
+                        <p class="text-sm text-slate-500 mb-2">※病気やケガですぐに働けない、学業に専念する、しばらく休養したい、という場合は対象外です。</p>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center"><input type="radio" name="q3" value="yes" class="mr-2">はい</label>
+                            <label class="flex items-center"><input type="radio" name="q3" value="no" class="mr-2">いいえ</label>
+                        </div>
+                    </div>
+                    <button id="checkButton" class="w-full bg-sky-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-sky-700 transition-colors">判定する</button>
+                </div>
+                <div id="result" class="hidden text-center mt-6">
+                    <h3 id="result-title" class="text-2xl font-bold mb-2"></h3>
+                    <p id="result-text" class="text-slate-600"></p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="process" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-slate-800">手続きの６ステップ</h2>
+            <p class="text-center text-slate-500 mb-8">受給までの流れを分かりやすく解説します。</p>
+            <div class="space-y-8">
+                <div class="flex items-start bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                    <div class="step-icon bg-sky-500">1</div>
+                    <div class="ml-6">
+                        <h3 class="font-bold text-xl mb-1">会社から書類をもらう</h3>
+                        <p class="text-slate-600">退職時に会社から「離職票（りしょくひょう）」と「雇用保険被保険者証」を必ず受け取ります。これらは手続きに必須です。</p>
+                    </div>
+                </div>
+                <div class="flex items-start bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                    <div class="step-icon bg-sky-500">2</div>
+                    <div class="ml-6">
+                        <h3 class="font-bold text-xl mb-1">ハローワークで手続き</h3>
+                        <p class="text-slate-600">お住まいの地域を管轄するハローワークへ行き、求職の申込みをした後、必要書類を提出して受給資格の決定を受けます。</p>
+                    </div>
+                </div>
+                <div class="flex items-start bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                    <div class="step-icon bg-sky-500">3</div>
+                    <div class="ml-6">
+                        <h3 class="font-bold text-xl mb-1">7日間の待期期間</h3>
+                        <p class="text-slate-600">手続き後、7日間は「待期期間」となり、この間は失業保険が支給されません。全員に適用されます。</p>
+                    </div>
+                </div>
+                <div class="flex items-start bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                    <div class="step-icon bg-sky-500">4</div>
+                    <div class="ml-6">
+                        <h3 class="font-bold text-xl mb-1">雇用保険説明会に参加</h3>
+                        <p class="text-slate-600">ハローワークで指定された日時の説明会に参加します。「雇用保険受給資格者証」と「失業認定申告書」が渡されます。</p>
+                    </div>
+                </div>
+                <div class="flex items-start bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                    <div class="step-icon bg-sky-500">5</div>
+                    <div class="ml-6">
+                        <h3 class="font-bold text-xl mb-1">失業の認定</h3>
+                        <p class="text-slate-600">原則4週間に1度、ハローワークへ行き「失業認定申告書」に求職活動の実績を記入して提出し、失業状態であることの認定を受けます。</p>
+                    </div>
+                </div>
+                <div class="flex items-start bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                    <div class="step-icon bg-sky-500">6</div>
+                    <div class="ml-6">
+                        <h3 class="font-bold text-xl mb-1">受給</h3>
+                        <p class="text-slate-600">失業の認定を受けると、通常5営業日ほどで指定した金融機関の口座に失業保険が振り込まれます。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="amount" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-slate-800">いくら、いつまで貰えるの？</h2>
+            <p class="text-center text-slate-500 mb-8">もらえる金額と期間は、年齢や働いていた期間、そして辞めた理由によって決まります。</p>
+            
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200 mb-8">
+                <h3 class="text-2xl font-bold mb-4 text-sky-800">もらえる金額（基本手当日額）の目安</h3>
+                <p class="text-slate-600">
+                    1日あたりにもらえる金額を「基本手当日額」といいます。これは、原則として退職前6ヶ月の給与合計を180で割った額（賃金日額）のおよそ50%～80%（60歳～64歳は45%～80%）です。給与が低い方ほど、給付率は高くなります。
+                </p>
+                <p class="text-slate-600 mt-2">
+                    <span class="font-bold">計算式のイメージ：</span> (退職前6ヶ月間の給与合計 ÷ 180) × 50～80%
+                </p>
+                <p class="text-sm text-slate-500 mt-2">※賃金日額と基本手当日額には上限額と下限額が定められています。</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
+                <h3 class="text-2xl font-bold mb-2 text-sky-800">もらえる期間（所定給付日数）シミュレーター</h3>
+                <p class="text-slate-600 mb-6">あなたの状況を選ぶと、もらえる日数の目安が分かります。</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <label for="reason" class="block text-sm font-medium text-slate-700">離職理由</label>
+                        <select id="reason" class="mt-1 block w-full py-2 px-3 border border-slate-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500">
+                            <option value="general">自己都合など（一般）</option>
+                            <option value="specific">倒産・解雇など（特定受給資格者）</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="age" class="block text-sm font-medium text-slate-700">年齢</label>
+                        <select id="age" class="mt-1 block w-full py-2 px-3 border border-slate-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500">
+                            <option value="under30">30歳未満</option>
+                            <option value="30to34">30歳～34歳</option>
+                            <option value="35to44">35歳～44歳</option>
+                            <option value="45to59">45歳～59歳</option>
+                            <option value="60to64">60歳～64歳</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="period" class="block text-sm font-medium text-slate-700">働いていた期間</label>
+                        <select id="period" class="mt-1 block w-full py-2 px-3 border border-slate-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500">
+                            <option value="under1">1年未満</option>
+                            <option value="1to4">1年以上5年未満</option>
+                            <option value="5to9">5年以上10年未満</option>
+                            <option value="10to19">10年以上20年未満</option>
+                            <option value="over20">20年以上</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="benefitDaysChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="cautions" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-slate-800">知っておきたい注意点</h2>
+            <p class="text-center text-slate-500 mb-8">安心して受給するために、大切なポイントをまとめました。</p>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                    <h3 class="font-bold text-xl text-amber-700 mb-2">① 給付制限について</h3>
+                    <p class="text-slate-600">自己都合で退職した場合、7日間の待期期間の後、さらに原則2ヶ月間（5年間のうち3回目以降の自己都合退職は3ヶ月）は失業保険が支給されない「給付制限」があります。会社都合の退職などにはこの制限はありません。</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                    <h3 class="font-bold text-xl text-amber-700 mb-2">② 求職活動の実績</h3>
+                    <p class="text-slate-600">失業の認定を受けるには、原則として前回の認定日から次回の認定日の前日までに2回以上（給付制限期間中は3回以上）の「求職活動」が必要です。求人への応募、ハローワークの職業相談、セミナー参加などが実績になります。</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                    <h3 class="font-bold text-xl text-amber-700 mb-2">③ 受給中のアルバイト</h3>
+                    <p class="text-slate-600">受給中にアルバイトは可能ですが、ルールがあります。週20時間以上働くと「就職」とみなされ、その期間は支給されません。週20時間未満でも、働いた日は失業認定申告書で正直に申告する必要があります。収入額によっては減額や先送りになることがあります。</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                    <h3 class="font-bold text-xl text-green-700 mb-2">④ 再就職手当でお祝い金</h3>
+                    <p class="text-slate-600">支給日数を3分の1以上残して早く再就職が決まると「再就職手当」というお祝い金がもらえます。残りの日数が多いほど、もらえる額も多くなります。早期の再就職を目指す大きなメリットです。</p>
+                </div>
+                 <div class="bg-white p-6 rounded-2xl shadow-lg border border-red-200 col-span-1 md:col-span-2">
+                    <h3 class="font-bold text-xl text-red-700 mb-2">⑤ 不正受給は絶対にダメ！</h3>
+                    <p class="text-slate-600">アルバイト収入を隠したり、求職活動をしていないのにしたと嘘の申告をしたりすると「不正受給」になります。発覚した場合、それまでに受け取った全額の返還はもちろん、さらにその2倍の金額（合計3倍）の納付が命じられるなど、非常に重いペナルティが科されます。</p>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+    
+    <footer class="bg-slate-800 text-white mt-16">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-slate-400 text-sm">
+            <p>このウェブサイトは、失業保険（雇用保険の基本手当）に関する一般的な情報を提供するものです。個別の状況については、必ずお住まいの地域を管轄するハローワークにご確認ください。</p>
+            <p class="mt-2">&copy; 2025 失業保険お悩み解決ガイド</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    const checkButton = document.getElementById('checkButton');
+    checkButton.addEventListener('click', function() {
+        const q1 = document.querySelector('input[name="q1"]:checked');
+        const q2 = document.querySelector('input[name="q2"]:checked');
+        const q3 = document.querySelector('input[name="q3"]:checked');
+
+        const resultDiv = document.getElementById('result');
+        const resultTitle = document.getElementById('result-title');
+        const resultText = document.getElementById('result-text');
+
+        if (!q1 || !q2 || !q3) {
+            resultTitle.textContent = '判定できません';
+            resultTitle.className = 'text-2xl font-bold mb-2 text-amber-600';
+            resultText.textContent = 'すべての質問に回答してください。';
+            resultDiv.classList.remove('hidden');
+            return;
+        }
+
+        if (q1.value === 'yes' && q2.value === 'yes' && q3.value === 'yes') {
+            resultTitle.textContent = '受給できる可能性が高いです！';
+            resultTitle.className = 'text-2xl font-bold mb-2 text-green-600';
+            resultText.innerHTML = '基本的な条件を満たしています。次のステップに進んで、手続きの流れを確認しましょう。<br>※これは簡易的な判定です。最終的な判断はハローワークが行います。';
+        } else {
+            resultTitle.textContent = '受給の条件を満たしていない可能性があります';
+            resultTitle.className = 'text-2xl font-bold mb-2 text-red-600';
+            let reasonText = '以下の理由で、受給が難しいかもしれません。<br>';
+            if (q1.value === 'no') reasonText += '・雇用保険に加入していない<br>';
+            if (q2.value === 'no') reasonText += '・働いていた期間が足りない<br>';
+            if (q3.value === 'no') reasonText += '・働く意思や能力がないと判断される<br>';
+            reasonText += '<br>ご自身の状況をもう一度確認し、不明な点はハローワークにご相談ください。';
+            resultText.innerHTML = reasonText;
+        }
+        resultDiv.classList.remove('hidden');
+    });
+
+    const benefitData = {
+        general: {
+            under30: { under1: 0, '1to4': 90, '5to9': 90, '10to19': 120, over20: 150 },
+            '30to34': { under1: 0, '1to4': 90, '5to9': 90, '10to19': 120, over20: 150 },
+            '35to44': { under1: 0, '1to4': 90, '5to9': 90, '10to19': 120, over20: 150 },
+            '45to59': { under1: 0, '1to4': 90, '5to9': 90, '10to19': 120, over20: 150 },
+            '60to64': { under1: 0, '1to4': 90, '5to9': 90, '10to19': 120, over20: 150 },
+        },
+        specific: {
+            under30: { under1: 90, '1to4': 120, '5to9': 180, '10to19': 210, over20: 240 },
+            '30to34': { under1: 90, '1to4': 180, '5to9': 210, '10to19': 240, over20: 270 },
+            '35to44': { under1: 90, '1to4': 180, '5to9': 240, '10to19': 270, over20: 300 },
+            '45to59': { under1: 90, '1to4': 180, '5to9': 270, '10to19': 300, over20: 330 },
+            '60to64': { under1: 150, '1to4': 210, '5to9': 240, '10to19': 270, over20: 300 },
+        }
+    };
+    
+    Object.keys(benefitData.specific).forEach(ageGroup => {
+        Object.keys(benefitData.specific[ageGroup]).forEach(periodGroup => {
+            if (benefitData.specific[ageGroup][periodGroup] === 0) {
+                 benefitData.specific[ageGroup][periodGroup] = 90;
+            }
+        });
+    });
+
+    const reasonSelect = document.getElementById('reason');
+    const ageSelect = document.getElementById('age');
+    const periodSelect = document.getElementById('period');
+    const ctx = document.getElementById('benefitDaysChart').getContext('2d');
+    
+    let benefitChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['あなたの給付日数（目安）'],
+            datasets: [{
+                label: '日数',
+                data: [0],
+                backgroundColor: ['rgba(56, 189, 248, 0.6)'],
+                borderColor: ['rgba(56, 189, 248, 1)'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 360,
+                    title: {
+                        display: true,
+                        text: '日数'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return ` ${context.raw} 日`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    function updateChart() {
+        const reason = reasonSelect.value;
+        const age = ageSelect.value;
+        const period = periodSelect.value;
+        
+        const days = benefitData[reason][age][period];
+        
+        benefitChart.data.datasets[0].data[0] = days;
+        benefitChart.update();
+    }
+
+    reasonSelect.addEventListener('change', updateChart);
+    ageSelect.addEventListener('change', updateChart);
+    periodSelect.addEventListener('change', updateChart);
+    
+    updateChart();
+    
+    document.querySelectorAll('nav a').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            document.querySelector(targetId).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+});
+</script>
+</body>
+</html>
