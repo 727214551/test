@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>○○運送株式会社</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+  <!-- ヘッダー -->
+  <header class="bg-white shadow">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold">○○運送株式会社</h1>
+      <button id="menu-btn" class="md:hidden block">☰</button>
+      <nav id="menu" class="hidden md:flex space-x-4">
+        <a href="#services" class="hover:text-blue-600">サービス</a>
+        <a href="#fleet" class="hover:text-blue-600">車両紹介</a>
+        <a href="#about" class="hover:text-blue-600">会社概要</a>
+        <a href="#recruit" class="hover:text-blue-600">採用情報</a>
+        <a href="#contact" class="hover:text-blue-600">お問い合わせ</a>
+      </nav>
+    </div>
+    <script>
+      document.getElementById("menu-btn").onclick = () => {
+        document.getElementById("menu").classList.toggle("hidden");
+      };
+    </script>
+  </header>
+
+  <!-- ヒーローセクション -->
+  <section class="bg-blue-600 text-white text-center py-20 px-4">
+    <h2 class="text-3xl md:text-5xl font-bold">確実・迅速・丁寧な運送を。</h2>
+    <p class="mt-4 text-lg">地域密着50年の実績。○○運送株式会社はお客様の大切な荷物を確実に届けます。</p>
+  </section>
+
+  <!-- サービス -->
+  <section id="services" class="py-16 px-6 bg-white">
+    <h3 class="text-2xl font-bold mb-6 text-center">サービス内容</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      <div class="p-6 bg-gray-100 rounded-lg shadow">
+        <h4 class="text-xl font-semibold mb-2">一般貨物運送</h4>
+        <p>全国各地への迅速な配送を実現。ルート便・チャーター便にも対応可能です。</p>
+      </div>
+      <div class="p-6 bg-gray-100 rounded-lg shadow">
+        <h4 class="text-xl font-semibold mb-2">冷凍・冷蔵配送</h4>
+        <p>食品や医薬品など、温度管理が必要な荷物にも万全の体制で対応。</p>
+      </div>
+      <div class="p-6 bg-gray-100 rounded-lg shadow">
+        <h4 class="text-xl font-semibold mb-2">倉庫保管・流通加工</h4>
+        <p>一時保管や仕分け・検品・包装などの流通加工サービスもご相談ください。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 車両紹介 -->
+  <section id="fleet" class="py-16 px-6 bg-gray-50">
+    <h3 class="text-2xl font-bold mb-6 text-center">車両・設備紹介</h3>
+    <div class="flex flex-col md:flex-row justify-center items-center gap-6">
+      <img src="truck.jpg" alt="大型トラック" class="w-full md:w-1/3 rounded shadow" />
+      <div class="max-w-md">
+        <p>大型ウィング車・冷凍車・ユニック車など多様な車両を保有し、あらゆるニーズに対応します。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 会社概要 -->
+  <section id="about" class="py-16 px-6 bg-white">
+    <h3 class="text-2xl font-bold mb-6 text-center">会社概要</h3>
+    <div class="max-w-3xl mx-auto">
+      <table class="w-full table-auto">
+        <tr><td class="py-2 font-semibold">会社名</td><td>○○運送株式会社</td></tr>
+        <tr><td class="py-2 font-semibold">所在地</td><td>〒000-0000 北海道帯広市○○町○-○</td></tr>
+        <tr><td class="py-2 font-semibold">設立</td><td>1975年4月</td></tr>
+        <tr><td class="py-2 font-semibold">代表者</td><td>代表取締役 ○○ ○○</td></tr>
+        <tr><td class="py-2 font-semibold">連絡先</td><td>TEL: 0123-45-6789 / FAX: 0123-45-6780</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 採用情報 -->
+  <section id="recruit" class="py-16 px-6 bg-gray-100">
+    <h3 class="text-2xl font-bold mb-6 text-center">採用情報</h3>
+    <div class="max-w-3xl mx-auto space-y-4">
+      <p>○○運送株式会社では、私たちと共に働く仲間を募集しています。</p>
+      <ul class="list-disc pl-6">
+        <li>大型トラック運転手（正社員）</li>
+        <li>倉庫管理スタッフ（パート・正社員）</li>
+        <li>整備士・管理職候補</li>
+      </ul>
+      <p class="mt-4">履歴書をご用意のうえ、お電話またはお問い合わせフォームからご連絡ください。</p>
+    </div>
+  </section>
+
+  <!-- お問い合わせ -->
+  <section id="contact" class="py-16 px-6 bg-white">
+    <h3 class="text-2xl font-bold mb-6 text-center">お問い合わせ</h3>
+    <div class="max-w-xl mx-auto">
+      <form class="space-y-4">
+        <input type="text" placeholder="お名前" class="w-full px-4 py-2 border rounded" required />
+        <input type="email" placeholder="メールアドレス" class="w-full px-4 py-2 border rounded" required />
+        <textarea rows="5" placeholder="お問い合わせ内容" class="w-full px-4 py-2 border rounded" required></textarea>
+        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">送信</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- フッター -->
+  <footer class="text-center py-6 text-sm text-gray-500 bg-white border-t">
+    © 2025 ○○運送株式会社. All rights reserved.
+  </footer>
+
+</body>
+</html>
